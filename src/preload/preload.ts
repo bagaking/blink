@@ -1,5 +1,8 @@
-const { contextBridge } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  // 在这里定义你想要暴露给渲染进程的 API
+  openDirectory: () => ipcRenderer.invoke("open-directory"),
+  onDirectoryScanned: (callback) =>
+    ipcRenderer.on("directory-scanned", callback),
+  readFile: (filePath) => ipcRenderer.invoke("read-file", filePath),
 });

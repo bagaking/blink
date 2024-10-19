@@ -5,7 +5,7 @@
   "main": "dist/main/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite build --watch & electron .",
+    "dev": "concurrently \"vite\" \"electron .\"",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -18,6 +18,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
     "electron": "^33.0.1",
     "electron-builder": "^25.1.8",
     "postcss": "^8.4.47",
@@ -29,8 +30,21 @@
     "vite-plugin-electron": "^0.28.8"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.3.3",
+    "@codemirror/lang-markdown": "^6.3.0",
+    "@codemirror/language": "^6.10.1",
+    "@codemirror/language-data": "^6.5.1",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.26.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/joy": "5.0.0-beta.48"
+    "@mui/joy": "5.0.0-beta.48",
+    "@types/prismjs": "^1.26.4",
+    "@types/react-beautiful-dnd": "^13.1.8",
+    "prismjs": "^1.29.0",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-icons": "^4.8.0",
+    "react-split": "^2.0.14"
   }
 }
