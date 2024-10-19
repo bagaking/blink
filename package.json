@@ -5,7 +5,7 @@
   "main": "dist/main/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"vite\" \"electron .\"",
+    "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
@@ -14,11 +14,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
-    "concurrently": "^9.0.1",
     "electron": "^33.0.1",
     "electron-builder": "^25.1.8",
     "postcss": "^8.4.47",
@@ -39,12 +39,14 @@
     "@codemirror/view": "^6.26.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@lezer/highlight": "^1.2.1",
     "@mui/joy": "5.0.0-beta.48",
-    "@types/prismjs": "^1.26.4",
     "@types/react-beautiful-dnd": "^13.1.8",
-    "prismjs": "^1.29.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "react-beautiful-dnd": "^13.1.1",
     "react-icons": "^4.8.0",
-    "react-split": "^2.0.14"
+    "react-markdown": "^9.0.1",
+    "react-split": "^2.0.14",
+    "react-syntax-highlighter": "^15.6.1"
   }
 }

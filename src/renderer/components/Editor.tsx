@@ -1,19 +1,38 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EditorState } from "@codemirror/state";
 import {
   EditorView,
   keymap,
   lineNumbers,
   highlightActiveLine,
+  highlightSpecialChars,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  crosshairCursor,
+  highlightActiveLineGutter,
 } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab,
+} from "@codemirror/commands";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import {
   syntaxHighlighting,
   defaultHighlightStyle,
+  foldGutter,
+  indentOnInput,
+  bracketMatching,
+  foldKeymap,
 } from "@codemirror/language";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { getLanguageByExtension } from "../config/languageMap";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark as oneDarkTheme } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface EditorProps {
   file: string | null;
@@ -22,33 +41,67 @@ interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = ({ file, content, onContentChange }) => {
-  console.log("Editor rendering with file:", file);
-  console.log("Editor content:", content);
-
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
+  const [previewContent, setPreviewContent] = useState<string>("");
 
   useEffect(() => {
-    console.log("Editor useEffect triggered");
     if (editorRef.current && !viewRef.current) {
-      console.log("Creating new EditorView");
+      const fileExtension = file ? file.split(".").pop()?.toLowerCase() : "";
+      const language = getLanguageByExtension(fileExtension || "");
+
       const state = EditorState.create({
         doc: content || "",
         extensions: [
           lineNumbers(),
-          highlightActiveLine(),
+          highlightActiveLineGutter(),
+          highlightSpecialChars(),
           history(),
-          keymap.of([...defaultKeymap, ...historyKeymap]),
-          markdown({
-            base: markdownLanguage,
-            codeLanguages: languages,
-            addKeymap: true,
-          }),
-          syntaxHighlighting(defaultHighlightStyle),
+          foldGutter(),
+          drawSelection(),
+          dropCursor(),
+          EditorState.allowMultipleSelections.of(true),
+          indentOnInput(),
+          bracketMatching(),
+          rectangularSelection(),
+          crosshairCursor(),
+          highlightActiveLine(),
+          keymap.of([
+            ...defaultKeymap,
+            ...historyKeymap,
+            ...foldKeymap,
+            indentWithTab,
+          ]),
+          language === "markdown"
+            ? markdown({
+                base: markdownLanguage,
+                codeLanguages: languages,
+                addKeymap: true,
+              })
+            : languages.find((lang) => lang.name === language)?.load() || [],
+          syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
           oneDark,
+          EditorView.lineWrapping,
+          EditorView.theme({
+            "&": {
+              height: "100%",
+              width: "100%",
+            },
+            ".cm-scroller": {
+              overflow: "auto",
+              height: "100%",
+            },
+            ".cm-content": {
+              minHeight: "100%",
+            },
+          }),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
-              onContentChange(update.state.doc.toString());
+              const newContent = update.state.doc.toString();
+              onContentChange(newContent);
+              if (language === "markdown") {
+                setPreviewContent(newContent);
+              }
             }
           }),
         ],
@@ -58,30 +111,39 @@ const Editor: React.FC<EditorProps> = ({ file, content, onContentChange }) => {
         state,
         parent: editorRef.current,
       });
+
+      // 确保 CodeMirror 编辑器占满其容器
+      const resizeObserver = new ResizeObserver(() => {
+        viewRef.current?.requestMeasure();
+      });
+      resizeObserver.observe(editorRef.current);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
     }
 
     return () => {
-      console.log("Editor cleanup");
       viewRef.current?.destroy();
       viewRef.current = null;
     };
-  }, []);
+  }, [file, content]);
 
   useEffect(() => {
-    console.log("Content or file changed:", content, file);
     if (content !== null && viewRef.current) {
       const currentContent = viewRef.current.state.doc.toString();
       if (content !== currentContent) {
-        console.log("Updating editor content");
         viewRef.current.dispatch({
           changes: { from: 0, to: currentContent.length, insert: content },
         });
       }
     }
+    if (file && file.endsWith(".md")) {
+      setPreviewContent(content || "");
+    }
   }, [content, file]);
 
   if (!file) {
-    console.log("No file selected, rendering placeholder");
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
         请选择一个文件进行编辑
@@ -89,10 +151,47 @@ const Editor: React.FC<EditorProps> = ({ file, content, onContentChange }) => {
     );
   }
 
-  console.log("Rendering editor");
+  const fileExtension = file.split(".").pop()?.toLowerCase();
+  const isMarkdown = fileExtension === "md" || fileExtension === "markdown";
+
   return (
-    <div className="h-full flex flex-col">
-      <div ref={editorRef} className="flex-1 overflow-auto" />
+    <div className="h-full flex flex-col bg-gray-900 text-white">
+      {isMarkdown ? (
+        <div className="flex-1 flex overflow-hidden">
+          <div className="w-1/2 h-full overflow-hidden">
+            <div ref={editorRef} className="h-full w-full" />
+          </div>
+          <div className="w-1/2 h-full overflow-auto p-4 prose prose-invert prose-sm max-w-none">
+            <ReactMarkdown
+              components={{
+                code({ node, inline, className, children, ...props }) {
+                  const match = /language-(\w+)/.exec(className || "");
+                  return !inline && match ? (
+                    <SyntaxHighlighter
+                      style={oneDarkTheme}
+                      language={match[1]}
+                      PreTag="div"
+                      {...props}
+                    >
+                      {String(children).replace(/\n$/, "")}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...props}>
+                      {children}
+                    </code>
+                  );
+                },
+              }}
+            >
+              {previewContent}
+            </ReactMarkdown>
+          </div>
+        </div>
+      ) : (
+        <div className="h-full w-full overflow-hidden">
+          <div ref={editorRef} className="h-full w-full" />
+        </div>
+      )}
     </div>
   );
 };

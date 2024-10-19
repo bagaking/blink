@@ -10,15 +10,19 @@
    - File system integration
    - Markdown editor with CodeMirror 6
    - Tab management for multiple open files
+   - Split pane layout for file explorer and editor
+   - Implemented memoization for performance optimization
 
 3. UI Design and Implementation
    - Implement split-pane layout with react-split
    - Create FileExplorer and Editor components
    - Develop TabBar for file navigation
+   - Implement dark theme throughout the application
 
 4. Performance Optimization
    - Implement lazy loading for file tree
    - Optimize rendering for large files
+   - Use useMemo for Split component to prevent unnecessary re-renders
 
 ## Current Implementation
 
@@ -27,6 +31,9 @@
 - Multi-tab editing interface
 - Markdown editing with syntax highlighting
 - Split-pane layout for file explorer and editor
+- Dark theme implementation
+- Persistent split sizes between file explorer and editor
+- Improved editor height management for all file types
 
 ## Project Structure
 
@@ -60,4 +67,31 @@
   - tsconfig.json                      # TypeScript configuration
   - vite.config.ts                     # Vite build configuration
 
-This structure represents the current state of the Blink project, showcasing the main components and configuration files essential for the application's functionality.
+## Key Components
+
+### App.tsx
+- Manages the overall application state
+- Implements the split-pane layout using react-split
+- Handles file selection, opening, and closing
+- Uses memoization to optimize performance of the Split component
+
+### Editor.tsx
+- Implements CodeMirror 6 for text editing
+- Supports Markdown preview for .md files
+- Implements syntax highlighting for various file types
+- Ensures editor occupies full height of its container
+
+### FileExplorer.tsx
+- Displays the file tree structure
+- Handles file selection and navigation
+
+### TabBar.tsx
+- Manages open file tabs
+- Supports drag-and-drop reordering of tabs
+
+### main.ts
+- Sets up the Electron main process
+- Handles IPC communication for file system operations
+- Implements menu and global shortcuts
+
+This structure represents the current state of the Blink project, showcasing the main components and their functionalities essential for the application's core features.

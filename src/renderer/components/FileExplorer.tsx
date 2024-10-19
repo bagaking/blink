@@ -2,27 +2,12 @@ import React, { useState } from "react";
 import { getFileTypeConfig } from "../config/fileTypes";
 import { getLanguageByExtension } from "../config/languageMap";
 
-import Prism from "prismjs";
-import "prismjs/themes/prism.css";
-// 导入所有你需要支持的语言
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-yaml";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-java";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-cpp";
-// 根据需要导入更多语言
-
 interface FileProps {
   name: string;
   type: "file" | "directory";
   path: string;
   children?: FileProps[];
-  content?: string; // 添加文件内容属性
+  content?: string;
 }
 
 interface FileExplorerProps {
@@ -66,15 +51,9 @@ const File: React.FC<
 
   const renderPreview = () => {
     if (!content) return null;
-    const language = getLanguageByExtension(name);
-    const highlightedCode = Prism.highlight(
-      content,
-      Prism.languages[language] || Prism.languages.plaintext,
-      language
-    );
     return (
       <pre className="text-xs mt-2 p-2 bg-gray-100 rounded">
-        <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+        <code>{content}</code>
       </pre>
     );
   };

@@ -39,35 +39,12 @@ export default defineConfig({
         },
       },
     ]),
-    {
-      name: "vscode-icons",
-      configureServer(server) {
-        server.middlewares.use((req, res, next) => {
-          if (req.url?.startsWith("/@vscode-icons/")) {
-            const iconPath = req.url.replace("/@vscode-icons/", "");
-            const filePath = path.resolve(
-              __dirname,
-              "node_modules/vscode-icons-js/icons",
-              iconPath
-            );
-            if (fs.existsSync(filePath)) {
-              res.setHeader("Content-Type", "image/svg+xml");
-              fs.createReadStream(filePath).pipe(res);
-            } else {
-              next();
-            }
-          } else {
-            next();
-          }
-        });
-      },
-    },
   ],
   build: {
     outDir: "dist/renderer",
     emptyOutDir: true,
   },
   server: {
-    port: 5173, // 确保这里的端口与 main.ts 中的一致
+    port: 5173,
   },
 });

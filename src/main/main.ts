@@ -1,4 +1,11 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  globalShortcut,
+} from "electron";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs/promises";
@@ -23,7 +30,10 @@ function createWindow() {
   if (app.isPackaged) {
     mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
   } else {
-    loadURL(mainWindow, "http://localhost:5173");
+    // 在开发模式下，等待一段时间再加载 URL
+    setTimeout(() => {
+      mainWindow?.loadURL("http://localhost:5173");
+    }, 1000); // 给 Vite 服务器一些额外的启动时间
   }
 
   // 添加菜单项
@@ -53,9 +63,28 @@ function createWindow() {
         },
       ],
     },
+    {
+      label: "开发",
+      submenu: [
+        {
+          label: "打开开发者工具",
+          accelerator: "CmdOrCtrl+Option+I",
+          click: () => {
+            mainWindow?.webContents.openDevTools();
+          },
+        },
+      ],
+    },
   ];
-  const menu = Menu.buildFromTemplate(template);
+  const menu = Menu.buildFromTemplate(
+    template as Electron.MenuItemConstructorOptions[]
+  );
   Menu.setApplicationMenu(menu);
+
+  // 注册全局快捷键
+  globalShortcut.register("CmdOrCtrl+Option+I", () => {
+    mainWindow?.webContents.openDevTools();
+  });
 
   // 添加打开 DevTools 的功能
   mainWindow.webContents.openDevTools();
@@ -164,3 +193,8 @@ function loadURL(window: BrowserWindow, url: string) {
 
   loadWithRetry();
 }
+
+app.on("will-quit", () => {
+  // 注销所有快捷键
+  globalShortcut.unregisterAll();
+});

@@ -22,9 +22,6 @@ const TabBar: React.FC<TabBarProps> = ({
   onCloseFile,
   onReorderTabs,
 }) => {
-  console.log("TabBar rendering with openFiles:", openFiles);
-  console.log("TabBar rendering with activeFile:", activeFile);
-
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const newOrder = Array.from(openFiles);
@@ -34,7 +31,6 @@ const TabBar: React.FC<TabBarProps> = ({
   };
 
   if (openFiles.length === 0) {
-    console.log("TabBar not rendering due to empty openFiles");
     return null;
   }
 
@@ -45,7 +41,7 @@ const TabBar: React.FC<TabBarProps> = ({
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="flex bg-gray-100 overflow-x-auto h-10 border-b border-gray-300"
+            className="flex bg-gray-800 overflow-x-auto h-10 border-b border-gray-700"
           >
             {openFiles.map((file, index) => (
               <Draggable key={file.path} draggableId={file.path} index={index}>
@@ -54,10 +50,10 @@ const TabBar: React.FC<TabBarProps> = ({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`flex items-center px-3 py-1 cursor-pointer border-r border-gray-200 ${
+                    className={`flex items-center px-3 py-1 cursor-pointer border-r border-gray-700 ${
                       file.path === activeFile
-                        ? "bg-white text-blue-600"
-                        : "hover:bg-gray-200"
+                        ? "bg-gray-700 text-white"
+                        : "hover:bg-gray-700"
                     }`}
                     onClick={() => onSelectFile(file.path)}
                   >
