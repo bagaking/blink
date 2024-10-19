@@ -4,7 +4,7 @@ import { Button } from "@mui/joy";
 const App: React.FC = () => {
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Electron Markdown Browser</h1>
+      <h1 className="text-2xl font-bold mb-4">Blink</h1>
       <Button>Hello Joy UI</Button>
     </div>
   );
